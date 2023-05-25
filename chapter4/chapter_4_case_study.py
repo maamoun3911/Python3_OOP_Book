@@ -7,15 +7,15 @@ class User:
     def __init__(self, username, password) -> None:
         self.username, self.logged_in = username, False
         self.password = self._encrypt_password(password)
-        
+    
     def _encrypt_password(self, password):
-        hash_string = (self.username+password)
+        hash_string = self.username+password
         hash_string = hash_string.encode("utf8")
         return hashlib.sha256(hash_string).hexdigest()
     
     def check_password(self, password):
-        encrypt = self._encrypt_password(password)
-        return encrypt == self.password
+        encrypt_password = self._encrypt_password(password)
+        return encrypt_password == self.password
 
 
 class AuthException(Exception):
@@ -46,21 +46,22 @@ class InvalidPassword(AuthException):
 
 class Authenticator:
     def __init__(self) -> None:
-        self.users = {}
+        self.users: dict[str, User] = {}
     
     def add_user(self, username, password):
         if username in self.users:
-            raise UsernameAlreadyExists
+            raise UsernameAlreadyExists(username)
+        
         if len(password) < 6:
             raise PasswordTooShort
         
         self.users[username] = User(username, password)
-        
+    
     def login(self, username, password):
         try:
             user: User = self.users[username]
         except KeyError:
-            raise InvalidUsername
+            raise InvalidUsername(f"{username} is not exist")
         
         if not user.check_password(password):
             raise InvalidPassword
@@ -86,46 +87,50 @@ class NotPermittedError(AuthException):
 
 
 # by defination this class has two attrs one is Authneticator object and second is permission sys (dict) 
-# methods: 1] add_permission: add pemission to authorizor sys(dict) where permisiion name is key and username is value in a set()
+# methods: 1] add_permission: add pemission to authorizor sys(dict) where
+#               permisiion name is key and username is value in a set()
 #          2] permit_user: checks if User object in authorizor authenticator sys object and check
 #               if permission is added to authorizor permission sys(dict) object
 #          3] check_permission: check if the permission in permission sys(dict) and
-#               if User object is logged-in and User object in permission sys(dict) of checked permission set values
+#               if User object is logged-in and 
+#                   given username in permission sys(dict) of checked permission set values
 
 class Authorizor:
     def __init__(self, authenticator: Authenticator) -> None:
-        self.authenticator = authenticator
-        self.permission = {}
-        
+        self.authenticator, self.permission = authenticator, {}
+    
     def add_permission(self, perm_name):
         try:
             perm_set = self.permission[perm_name]
         except KeyError:
             self.permission[perm_name] = set()
         else:
-            raise PermissionError("Permissionss Exists")
+            raise PermissionError(f"{perm_name} alread exists")
     
     def permit_user(self, perm_name, username):
         try:
             perm_set = self.permission[perm_name]
         except KeyError:
-            raise PermissionError("Permission isn't exists")
+            raise PermissionError(f"{perm_name} is not exist")
         else:
-            if username not in self.authenticator.users:
+            if not username in self.authenticator.users:
                 raise InvalidUsername(username)
             perm_set.add(username)
-
+    
     def check_permission(self, perm_name, username):
         if not self.authenticator.is_logged_in(username):
-            raise NotLoggedInError(username)
+            raise NotLoggedInError
+        
         try:
             perm_set = self.permission[perm_name]
         except KeyError:
-            raise PermissionError("Permission does not exist")
+            raise PermissionError(f"{perm_name} isn't exists")
+        
         else:
-            if username not in perm_set:
+            if not username in self.permission[perm_name]:
                 raise NotPermittedError(username)
             return True
+        
 
 authorizor = Authorizor(authenticator)
 
