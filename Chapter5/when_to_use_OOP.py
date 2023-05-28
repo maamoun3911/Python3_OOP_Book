@@ -152,36 +152,7 @@
 # if __name__ == "__main__":
 #     ScaleZip(*sys.argv[1:4]).process_zip()
 
-# composition example
-#
-
-
-    
-    
-class Square:
-    def __init__(self, length) -> None:
-        self.length = length
-        
-    def area(self, rectangle):
-        print(rectangle.width_length)
-        return rectangle.length*rectangle.width
-
-class Rectangle:
-    def __init__(self, length, width, square: Square) -> None:
-        self.length = length
-        self.width = width
-        self.square = square
-        
-    def area(self):
-        return self.square.area(self)
-    
-    @property
-    def width_length(self):
-        return f"{self.length}-{self.width}"
-# square = Square(5)
-# rectangle = Rectangle(5, 4, square)
-# print(rectangle.area())
-
+# my example of composition & inheritance with each others
 class Area:
     def __init__(self) -> None:
         pass
@@ -194,19 +165,16 @@ class Rectangle:
         self.length, self.width = length, width
         self.area_obj = area_obj
     
+    @property
     def area(self):
         return self.area_obj.find_area(self)
 
-class Square:
-    def __init__(self, length, width, area_obj: Area) -> None:
-        self.length, self.width = length, width
-        self.area_obj = area_obj
-    
-    def area(self):
-        return self.area_obj.find_area(self)
-
+class Square(Rectangle):
+    def __init__(self, length, area_obj: Area) -> None:
+        super().__init__(length, length, area_obj)
+        
 area = Area()
 rectangle = Rectangle(5, 4, area)
-print(rectangle.area())
-square = Square(5, 5, area)
-print(square.area())
+print(rectangle.area)
+square = Square(5, area)
+print(square.area)
