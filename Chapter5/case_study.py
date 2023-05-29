@@ -64,11 +64,15 @@ class Document:
 
 
 d = Document()
-# d.insert("h")
+d.insert("h")
 d.insert(Character("e"))
 d.insert("l")
+d.insert("l")
+d.insert("o")
 d.cursor.back()
-d.delete()
+d.cursor.back()
+d.cursor.home()
+print(d.cursor.position)
 # d.insert("l")
 # d.insert("o")
 # d.insert("\n")
