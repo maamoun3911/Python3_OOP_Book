@@ -44,3 +44,15 @@ kv1 = KeyValue("two", 2)
 a = [kv, kv1]
 a.sort()
 print(a)
+
+# integer length
+class AdaptedInteger(int):
+    def __len__(self):
+        i = 0
+        while self:
+            self = self // 10
+            i += 1
+        return i
+
+num = AdaptedInteger(10)
+print(len(num))
