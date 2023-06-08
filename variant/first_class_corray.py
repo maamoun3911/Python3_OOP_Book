@@ -169,3 +169,86 @@
 # print(add_numbers(1, 5))
 
 # 5
+# from typing import Any
+
+
+# class SignInRequired:
+    
+#     def __init__(self, origin_func) -> None:
+#         self.origin_func = origin_func
+    
+#     def __call__(self, signed, *args: Any, **kwds: Any) -> Any:
+#         if signed:
+#             return self.origin_func(signed, *args, **kwds)
+#         return f"sing in first"
+
+# @SignInRequired
+# def signin(singed, *args, **kwds):
+#     return "welcome"
+# print(signin(True))
+
+# 6
+# from typing import Any
+# import time
+
+# class SignInRequired:
+    
+#     def __init__(self, origin_func) -> None:
+#         self.origin_func = origin_func
+    
+#     def __call__(self, signed, *args: Any, **kwds: Any) -> Any:
+#         if signed:
+#             return self.origin_func(signed, *args, **kwds)
+#         return f"sing in first"
+
+# class Time:
+#     def __init__(self, origin_func) -> None:
+#         self.origin_func = origin_func
+    
+#     def __call__(self, signed, *args: Any, **kwds: Any) -> Any:
+#         t1 = time.time()
+#         result = self.origin_func(signed, *args, **kwds)
+#         t = time.time() - t1
+#         print(f"function executed after {t}")
+#         return result
+
+# @SignInRequired
+# @Time
+# def signin(singed, *args, **kwds):
+#     time.sleep(1)
+#     return "welcome"
+# print(signin(False))
+
+# 7 
+from functools import wraps
+from typing import Any
+import time
+
+class SignInRequired:
+    
+    def __init__(self, origin_func) -> None:
+        self.origin_func = origin_func
+    
+    def __call__(self, signed, *args: Any, **kwds: Any) -> Any:
+        if signed:
+            return self.origin_func(signed, *args, **kwds), f"{self.origin_func.__name__}"
+        return f"sing in first"
+
+class Time:
+    def __init__(self, origin_func) -> None:
+        self.origin_func = origin_func
+    
+    def __call__(self, signed, *args: Any, **kwds: Any) -> Any:
+        t1 = time.time()
+        result = self.origin_func(signed, *args, **kwds)
+        t = time.time() - t1
+        print(f"function executed after {t}")
+        f"{self.origin_func.__name__}"
+        return result
+
+@SignInRequired
+@Time
+def signin(singed, *args, **kwds):
+    time.sleep(1)
+    return "welcome"
+print(signin(True))
