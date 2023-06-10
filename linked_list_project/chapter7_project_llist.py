@@ -1,10 +1,3 @@
-class Cursor:
-    def __init__(self) -> None:
-        self.cursor: int = 0
-    
-    # def __repr__(self) -> str:
-    #     return f"{self.cursor}"
-
 class LinkedList:
     def __init__(self, nodes = None) -> None:
         self.head = None
@@ -34,11 +27,12 @@ class LinkedList:
         uses __index() to find index and return value of it
         """
         index = self.__index(index)
-        head_node, idx, result = self.head, 0, None
+        head_node, result = self.head, None
         while head_node:
-            if idx == index:
+            if head_node.index == index:
                 result = head_node.data, head_node
-            idx, head_node = idx+1, head_node.next
+                break
+            head_node = head_node.next
         return result
 
     def get_element(self, index: int):
@@ -107,7 +101,7 @@ class LinkedList:
         if index == 0:
             self.insert_at_begging(node)
         elif index == length:
-            self.__last_traverse(node)
+            self.append(node)
         else:
             self.__normal_traverse(node)
             self._up(index, node.next)
@@ -118,22 +112,16 @@ class LinkedList:
         using __insertion_status()
         """
         index = self.__insertion_status(index, value)
-
-
-    def __last_traverse(self, node):
-        "helper method that return the last element"
-        last_node = self.head
-        while last_node.next:
-            last_node = last_node.next
-        last_node.next = node
     
     def append(self, value):
         """
         creating Node(value) and append to linked list
-        using __last_traverse()
         """
-        last_node = self.__last_traverse()
-        last_node.next = Node(data=value, index=last_node.index+1)
+        node = Node(data=value, index=len(self))
+        last_node = self.head
+        while last_node.next:
+            last_node = last_node.next
+        last_node.next = node
     
     def sort(self):
         """
@@ -164,16 +152,17 @@ class LinkedList:
                 node.index = node.index-1
             node = node.next
 
-    def pop_from_middle_last(self, index):
+    def _pop_from_middle_last(self, index):
         pre, nxt = self.head, self.head
         while nxt:
             if index == nxt.index:
                 pre.next = nxt.next
                 break
             pre, nxt = nxt, nxt.next
-        self._down(pre.next)
+        if len(self) != index:
+            self._down(pre.next)
 
-    def pop(self, index: int):
+    def pop(self, index: int = -1):
         """
         first we validate if index is available via __index()
         then we check the index place and pop demanded item
@@ -181,9 +170,15 @@ class LinkedList:
         index = self.__index(index)
         if index == 0:
             self.head = self.head.next
-            self._down(1)
+            self._index_backword()
         else:
-            self.pop_from_middle_last(index)
+            self._pop_from_middle_last(index)
+
+    def _index_backword(self):
+        head_node = self.head
+        while head_node:
+            head_node.index -= 1
+            head_node = head_node.next
 
     def delete(self, value):
         pre, nxt = self.head, self.head
@@ -193,7 +188,8 @@ class LinkedList:
                     self.head = self.head.next
                 else:
                     pre.next = nxt.next
-                self._down(pre.next.index)
+                if nxt.next:
+                    self._index_backword()
                 break
             pre, nxt = nxt, nxt.next
         else:
@@ -230,6 +226,11 @@ class LinkedList:
         #     return cache
         # raise StopIteration
 
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, type, value, tb):
+        return self
 
 class Node:
     def __init__(self, data, nxt=None, index: int = 0) -> None:
@@ -253,8 +254,5 @@ class Node:
         return self.data > object.data
 
 llist = LinkedList([1, 2, 3])
-# b =llist.get_element(1)
-# d = llist.get_element(3)
-llist.insert(1, 0)
-print(llist)
-print(llist.index(3))
+llist.delete(3)
+print(llist.get_element(0))
